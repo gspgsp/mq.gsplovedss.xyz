@@ -11,7 +11,7 @@ class Server
 
     public function __construct()
     {
-        $this->server = \swoole_server($this->host, $this->port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
+        $this->server = Swoole\Server($this->host, $this->port);
         $this->server->set(
             [
                 'worker_num'      => 1,
