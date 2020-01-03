@@ -11,7 +11,7 @@ class Server
 
     public function __construct()
     {
-        $this->server = Swoole\Server($this->host, $this->port);
+        $this->server = new swoole_server($this->host, $this->port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
         $this->server->set(
             [
                 'worker_num'      => 1,
@@ -22,7 +22,7 @@ class Server
                 'open_eof_split'  => true,
                 'package_eof'     => PHP_EOL,
                 'daemonize'       => false,
-                'log_file'=>'/var/log/gjh.log'
+                'log_file'        => '/var/log/gjh.log',
             ]
         );
 
