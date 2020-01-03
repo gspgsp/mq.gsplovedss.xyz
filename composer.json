@@ -1,0 +1,29 @@
+{
+  "name": "queue/mq.gsplovedss.xyz",
+  "description": "队列服务",
+  "type": "project",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "M Tick",
+      "email": "guoshipengdss@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "ext-redis": ">=4.0",
+    "ext-swoole": ">=4.0",
+    "ext-json": "*",
+    "ext-mysqli": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "Gjh\\Queue\\": "src/"
+    }
+  },
+  "scripts": {
+    "pre-update-cmd": [
+      "php -r \"file_exists('config.json') || copy('config.json.example', 'config.json');\""
+    ]
+  }
+}
