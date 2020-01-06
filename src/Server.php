@@ -11,13 +11,13 @@ class Server
 
     public function __construct()
     {
-        $this->server = new swoole_server($this->host, $this->port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
+        $this->server = new \swoole_server($this->host, $this->port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
         $this->server->set(
             [
                 'worker_num'      => 1,
                 'task_worker_num' => 2,
                 'task_ipc_mode'   => 1,
-                'dispatch_mode'   => 3,
+                'dispatch_mode'   => 2,
                 'open_eof_check'  => true,
                 'open_eof_split'  => true,
                 'package_eof'     => PHP_EOL,
@@ -27,6 +27,9 @@ class Server
         );
 
         $this->server->on('start', [$this, 'onStart']);
+        $this->server->on('connect', [$this, 'onConnect']);
+        $this->server->on('receive', [$this, 'onReceive']);
+        $this->server->on('task', [$this, 'onTask']);
     }
 
     public function start()
@@ -37,5 +40,20 @@ class Server
     public function onStart($server)
     {
         echo "Server listening on {$server->host}:{$server->port}\n";
+    }
+
+    public function onConnect($server, $fd, $from_id)
+    {
+        echo "i'm connect\n";
+    }
+
+    public function onReceive($server, $fd, $from_id, $data)
+    {
+        echo "i'm coming\n";
+    }
+
+    public function onTask($server, $task_id, $from_id, $data)
+    {
+        echo "i'm task:".$task_id."\n";
     }
 }
