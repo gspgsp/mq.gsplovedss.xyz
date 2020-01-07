@@ -1,6 +1,6 @@
 <?php
 
-namespace Gjh\app\controllers;
+namespace Gjh\Queue\app\controllers;
 
 class OrderExecuteController extends BaseController
 {

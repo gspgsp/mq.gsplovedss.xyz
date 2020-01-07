@@ -89,7 +89,7 @@ class Server
         $data   = @json_decode($data, true);
 
         if (!empty($data) && is_array($data)) {
-            $class  = 'Gjh\app\controllers\\'.$data['class'].'Controller';
+            $class  = 'Gjh\Queue\app\controllers\\'.$data['class'].'Controller';
             $params = $data['params'];
             $method = $data['method'];
             $config = [
@@ -98,7 +98,6 @@ class Server
             ];
 
             if (class_exists($class) && method_exists($class, $method)) {
-                var_dump($params);
                 $instance = new $class($config, $params);
                 $result   = $instance->$method();
             }else{
