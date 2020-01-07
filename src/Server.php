@@ -5,7 +5,7 @@ namespace Gjh\Queue;
 class Server
 {
     private $port = 9501;
-    private $host = '127.0.0.1';
+    private $host = '0.0.0.0';
 
     private $server;
     private $config;
