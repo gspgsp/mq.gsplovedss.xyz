@@ -96,8 +96,10 @@ class Server
                 'db'     => $this->db,
                 'config' => $this->config,
             ];
+            var_dump($data);
 
             if (class_exists($class) && method_exists($class, $method)) {
+                var_dump($params);
                 $instance = new $class($config, $params);
                 $result   = $instance->$method();
             }
