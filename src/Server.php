@@ -5,7 +5,7 @@ namespace Gjh\Queue;
 class Server
 {
     private $port = 9501;
-    private $host = '0.0.0.0';
+    private $host = '0.0.0.0';//这个host务必写成0.0.0.0，否则会连接拒绝
 
     private $server;
     private $config;
@@ -91,6 +91,6 @@ class Server
 
     public function onClose($server, $fd, $reactorId)
     {
-        echo "i'm close";
+        echo "i'm close\n";
     }
 }
