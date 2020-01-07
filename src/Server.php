@@ -58,7 +58,13 @@ class Server
     {
         //判断当前是Worker进程还是Task进程
         if ($server->taskworker) {
-            $this->db = new \mysqli($this->config['mysql']['host'], $this->config['mysql']['username'], $this->config['mysql']['password'], $this->config['mysql']['databasename'], $this->config['mysql']['port']);
+            $this->db = new \mysqli(
+                $this->config['mysql']['host'],
+                $this->config['mysql']['username'],
+                $this->config['mysql']['password'],
+                $this->config['mysql']['databasename'],
+                $this->config['mysql']['port']
+            );
 
 //            $result = $this->db->query("select * from h_users where id < 10");
 //            $rows = $result->fetch_all();
@@ -74,14 +80,30 @@ class Server
 
     public function onReceive($server, $fd, $from_id, $data)
     {
-        echo "i'm coming\n";
         $this->server->task($data);
     }
 
     public function onTask($server, $task_id, $from_id, $data)
     {
-        var_dump($data);
-        echo "i'm task:".$task_id." from $from_id\n";
+        $result = 0;
+        $data   = @json_decode($data, true);
+
+        if (!empty($data) && is_array($data)) {
+            $class  = 'Gjh\app\controllers\\'.$data['class'].'Controller';
+            $params = $data['params'];
+            $method = $data['method'];
+            $config = [
+                'db'     => $this->db,
+                'config' => $this->config,
+            ];
+
+            if (class_exists($class) && method_exists($class, $method)) {
+                $instance = new $class($config, $params);
+                $result   = $instance->$method();
+            }
+        }
+
+        return $result;
     }
 
     public function onFinish($server, $task_id, $data)
