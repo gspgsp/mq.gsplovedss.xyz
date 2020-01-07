@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * 消息处理服务
+ */
+
 namespace Gjh\Queue\app\controllers;
 
 class PaidSuccessMessageController extends BaseController
@@ -10,6 +14,6 @@ class PaidSuccessMessageController extends BaseController
      */
     public function paidSuccessMessage()
     {
-        echo "hello world";
+        return 1;
     }
 }
