@@ -8,14 +8,18 @@ class Server
     private $host = '127.0.0.1';
 
     private $server;
+    private $config;
+
+    private $db;
+    private $redis;
 
     public function __construct()
     {
         $this->server = new \swoole_server($this->host, $this->port, SWOOLE_PROCESS, SWOOLE_SOCK_TCP);
         $this->server->set(
             [
-                'worker_num'      => 1,
-                'task_worker_num' => 2,
+                'worker_num'      => 2,
+                'task_worker_num' => 4,
                 'task_ipc_mode'   => 1,
                 'dispatch_mode'   => 2,
                 'open_eof_check'  => true,
@@ -27,9 +31,17 @@ class Server
         );
 
         $this->server->on('start', [$this, 'onStart']);
+        $this->server->on('workerStart', [$this, 'onWorkerStart']);
         $this->server->on('connect', [$this, 'onConnect']);
         $this->server->on('receive', [$this, 'onReceive']);
         $this->server->on('task', [$this, 'onTask']);
+        $this->server->on('finish', [$this, 'onFinish']);
+        $this->server->on('close', [$this, 'onClose']);
+    }
+
+    public function setConfig($config)
+    {
+        $this->config = $config;
     }
 
     public function start()
@@ -42,6 +54,19 @@ class Server
         echo "Server listening on {$server->host}:{$server->port}\n";
     }
 
+    public function onWorkerStart($server, $worker_id)
+    {
+        //判断当前是Worker进程还是Task进程
+        if ($server->taskworker) {
+            $this->db = new \mysqli($this->config['mysql']['host'], $this->config['mysql']['username'], $this->config['mysql']['password'], $this->config['mysql']['databasename'], $this->config['mysql']['port']);
+
+//            $result = $this->db->query("select * from h_users where id < 10");
+//            $rows = $result->fetch_all();
+
+            echo $this->db->connect_errno ? "当前worker: {$worker_id}连接失败\n" : "当前worker: {$worker_id}连接成功\n";
+        }
+    }
+
     public function onConnect($server, $fd, $from_id)
     {
         echo "i'm connect\n";
@@ -50,10 +75,22 @@ class Server
     public function onReceive($server, $fd, $from_id, $data)
     {
         echo "i'm coming\n";
+        $this->server->task($data);
     }
 
     public function onTask($server, $task_id, $from_id, $data)
     {
-        echo "i'm task:".$task_id."\n";
+        var_dump($data);
+        echo "i'm task:".$task_id." from $from_id\n";
+    }
+
+    public function onFinish($server, $task_id, $data)
+    {
+        echo "$task_id - $data\n";
+    }
+
+    public function onClose($server, $fd, $reactorId)
+    {
+        echo "i'm close";
     }
 }
