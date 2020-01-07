@@ -4,9 +4,17 @@ namespace Gjh\Queue\app\controllers;
 
 class OrderExecuteController extends BaseController
 {
-
-    public function handle()
+    /**
+     * 订单处理
+     * @return int
+     */
+    public function orderExecute()
     {
-        echo "hello world\n";
+        if (!empty($this->params) && is_array($this->params)) {
+
+            return 1;
+        }
+
+        return 0;
     }
 }

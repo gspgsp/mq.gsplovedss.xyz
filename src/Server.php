@@ -100,8 +100,6 @@ class Server
             if (class_exists($class) && method_exists($class, $method)) {
                 $instance = new $class($config, $params);
                 $result   = $instance->$method();
-            }else{
-                var_dump(['class'=>$class]);
             }
         }
 
