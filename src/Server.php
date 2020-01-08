@@ -10,6 +10,9 @@ class Server
     private $server;
     private $config;
 
+    /**
+     * @var \mysqli
+     */
     private $db;
     private $redis;
 
@@ -54,6 +57,10 @@ class Server
         echo "Server listening on {$server->host}:{$server->port}\n";
     }
 
+    /**
+     * @param $server
+     * @param $worker_id
+     */
     public function onWorkerStart($server, $worker_id)
     {
         //判断当前是Worker进程还是Task进程
@@ -68,6 +75,13 @@ class Server
 
 //            $result = $this->db->query("select * from h_users where id < 10");
 //            $rows = $result->fetch_all();
+//            $this->db->autocommit(false);
+//
+//
+//
+//            $this->db->commit();
+//            $this->db->autocommit(true);
+//            $this->db->rollback();
 
             echo $this->db->connect_errno ? "当前worker: {$worker_id}连接失败\n" : "当前worker: {$worker_id}连接成功\n";
         }

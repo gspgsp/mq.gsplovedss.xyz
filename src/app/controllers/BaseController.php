@@ -15,7 +15,7 @@ class BaseController
     protected $params;
 
     /**
-     * @var | 数据库操作对象
+     * @var \mysqli
      */
     protected $db;
 
