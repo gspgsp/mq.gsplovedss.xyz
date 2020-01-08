@@ -29,7 +29,7 @@ class OrderExecuteController extends BaseController
                 if (!$result) {
                     return 0;
                 }
-                $this->order = $result->fetch_field();
+                $this->order = $result->fetch_row();
                 //开启事务
                 $this->db->begin_transaction();
                 try {
@@ -54,7 +54,7 @@ class OrderExecuteController extends BaseController
 
     private function _setUserCourse()
     {
-        $result = $this->db->query("select * from h_order_items where order_id = ".$this->order->id);
+        $result = $this->db->query("select * from h_order_items where order_id = ".$this->order[0]);
         if ($rows = $result->fetch_all()) {
             foreach ($rows as $k => $val) {
                 $type = $this->db->query("select type from h_edu_courses where id = ".$val['course_id']);
