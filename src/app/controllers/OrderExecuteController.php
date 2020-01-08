@@ -30,6 +30,7 @@ class OrderExecuteController extends BaseController
                     return 0;
                 }
                 $this->order = $result->fetch_row();
+                var_dump($this->order);
 
                 //开启事务
                 $this->db->begin_transaction();
