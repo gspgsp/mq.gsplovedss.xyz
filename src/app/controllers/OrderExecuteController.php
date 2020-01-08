@@ -29,7 +29,7 @@ class OrderExecuteController extends BaseController
                 if (!$result) {
                     return 0;
                 }
-                $this->order = $result->fetch_row();
+                $this->order = $result->fetch_field();
                 var_dump($this->order);
 
                 //开启事务
