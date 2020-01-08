@@ -24,7 +24,7 @@ class OrderExecuteController extends BaseController
                 //当为订单时
                 $this->params['order_id'] = 1563;
                 $result                   = $this->db->query(
-                    "select id, user_id from h_orders where id = ".$this->params['order_id']
+                    "select id, user_id, package_id from h_orders where id = ".$this->params['order_id']
                 );
                 if (!$result) {
                     return 0;
@@ -53,6 +53,10 @@ class OrderExecuteController extends BaseController
         return 0;
     }
 
+    /**
+     * 添加用户课程
+     * @return int
+     */
     private function _setUserCourse()
     {
         if ($result = $this->db->query(
@@ -72,7 +76,17 @@ class OrderExecuteController extends BaseController
 
     private function _setCourseBuyNum()
     {
+        if ($this->order['package_id']){
+            if ($this->db->query("update h_edu_packages set buy_num = buy_num + 1 where id = {$this->order['package_id']}")){
+                $this->db->query("update h_edu_courses set buy_num = buy_num + 1 where id in(select course_id from h_edu_package_course where package_id = {$this->order['package_id']})");
 
+                return 1;
+            }
+            return 0;
+        }else{
+            $this->db->query("update h_edu_courses set buy_num = buy_num + 1 where id in(select course_id from h_order_items where order_id = {$this->order['id']})");
+            return 1;
+        }
     }
 
     private function _setUserCoupon()

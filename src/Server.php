@@ -73,16 +73,6 @@ class Server
                 $this->config['mysql']['port']
             );
 
-//            $result = $this->db->query("select * from h_users where id < 10");
-//            $rows = $result->fetch_all();
-//            $this->db->autocommit(false);
-//
-//
-//
-//            $this->db->commit();
-//            $this->db->autocommit(true);
-//            $this->db->rollback();
-
             echo $this->db->connect_errno ? "当前worker: {$worker_id}连接失败\n" : "当前worker: {$worker_id}连接成功\n";
         }
     }
