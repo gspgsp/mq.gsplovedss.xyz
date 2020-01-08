@@ -65,7 +65,9 @@ class OrderExecuteController extends BaseController
             while ($row = $result->fetch_assoc()) {
                 $type = $this->db->query("select type from h_edu_courses where id = ".$row['course_id'])->fetch_assoc();
                 //先不考虑 训练营的课程
-                $this->db->query("insert into h_user_course (`type`, `user_id`, `course_id`, `order_id`, `order_item_id`, `created_at`, `updated_at`) value('{$type['type']}', {$this->order['user_id']}, {$row['course_id']}, {$this->order['id']}, {$row['id']}, '{$this->time}', '{$this->time}')");
+                $this->db->query(
+                    "insert into h_user_course (`type`, `user_id`, `course_id`, `order_id`, `order_item_id`, `created_at`, `updated_at`) value('{$type['type']}', {$this->order['user_id']}, {$row['course_id']}, {$this->order['id']}, {$row['id']}, '{$this->time}', '{$this->time}')"
+                );
             }
 
             return 1;
@@ -74,28 +76,73 @@ class OrderExecuteController extends BaseController
         return 0;
     }
 
+    /**
+     * 更新课程购买数
+     *
+     * @return int
+     */
     private function _setCourseBuyNum()
     {
-        if ($this->order['package_id']){
-            if ($this->db->query("update h_edu_packages set buy_num = buy_num + 1 where id = {$this->order['package_id']}")){
-                $this->db->query("update h_edu_courses set buy_num = buy_num + 1 where id in(select course_id from h_edu_package_course where package_id = {$this->order['package_id']})");
+        if ($this->order['package_id']) {
+            if ($this->db->query(
+                "update h_edu_packages set buy_num = buy_num + 1 where id = {$this->order['package_id']}"
+            )) {
+                $this->db->query(
+                    "update h_edu_courses set buy_num = buy_num + 1 where id in(select course_id from h_edu_package_course where package_id = {$this->order['package_id']})"
+                );
 
                 return 1;
             }
+
             return 0;
-        }else{
-            $this->db->query("update h_edu_courses set buy_num = buy_num + 1 where id in(select course_id from h_order_items where order_id = {$this->order['id']})");
+        } else {
+            $this->db->query(
+                "update h_edu_courses set buy_num = buy_num + 1 where id in(select course_id from h_order_items where order_id = {$this->order['id']})"
+            );
+
             return 1;
         }
     }
 
+    /**
+     * 如果当前课程有设置优惠券 那么者会给用户发一张优惠券
+     */
     private function _setUserCoupon()
     {
+        if ($res = $this->db->query(
+            "select coupon_id from h_edu_courses where id in(select course_id from h_order_items where order_id = {$this->order['id']})"
+        )) {
+            while ($row = $res->fetch_assoc()) {
+                if ($row['coupon_id']) {
+                    $this->_grantUserCoupon($this->order['id'], $row['coupon_id']);
+                    return 1;
+                }
+            }
+        }
 
+        if ($this->order['package_id']) {
+            if ($res = $this->db->query(
+                "select coupon_id from h_edu_packages where id = {$this->order['package_id']}"
+            )) {
+                while ($row = $res->fetch_assoc()) {
+                    if ($row['coupon_id']) {
+                        $this->_grantUserCoupon($this->order['id'], $row['coupon_id']);
+                        return 1;
+                    }
+                }
+            }
+        }
+
+        return 0;
     }
 
     private function _setUserPay()
     {
 
+    }
+
+    private function _grantUserCoupon($order_id, $coupon_id)
+    {
+        echo "coupon is:".$coupon_id."\n";
     }
 }
