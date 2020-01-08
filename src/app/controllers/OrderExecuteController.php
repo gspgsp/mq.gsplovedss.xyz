@@ -57,7 +57,7 @@ class OrderExecuteController extends BaseController
         $result = $this->db->query("select id, course_id from h_order_items where order_id = ".$this->order[0]);
         if ($rows = $result->fetch_all()) {
             foreach ($rows as $k => $val) {
-                $type = $this->db->query("select type from h_edu_courses where id = ".$val['course_id']);
+                $type = $this->db->query("select type from h_edu_courses where id = ".$val[1]);
                 //先不考虑 训练营的课程
                 $this->db->query(
                     "insert into h_user_course('type', 'user_id', 'course_id', 'order_id', 'order_item_id', 'created_at', 'updated_at') values({$type}, {$this->order[1]}, {$val[1]}, {$this->order[0]}, {$val[0]}, {$this->time}, {$this->time})"
