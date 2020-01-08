@@ -24,7 +24,7 @@ class OrderExecuteController extends BaseController
                 //当为订单时
                 $this->params['order_id'] = 1563;
                 $result                   = $this->db->query(
-                    "select * from h_orders where id = ".$this->params['order_id']
+                    "select id, user_id from h_orders where id = ".$this->params['order_id']
                 );
                 if (!$result) {
                     return 0;
@@ -54,13 +54,13 @@ class OrderExecuteController extends BaseController
 
     private function _setUserCourse()
     {
-        $result = $this->db->query("select * from h_order_items where order_id = ".$this->order[0]);
+        $result = $this->db->query("select id, course_id from h_order_items where order_id = ".$this->order[0]);
         if ($rows = $result->fetch_all()) {
             foreach ($rows as $k => $val) {
                 $type = $this->db->query("select type from h_edu_courses where id = ".$val['course_id']);
                 //先不考虑 训练营的课程
                 $this->db->query(
-                    "insert into h_user_course('type', 'user_id', 'course_id', 'order_id', 'order_item_id', 'created_at', 'updated_at') values({$type}, {$val['user_id']}, {$val['course_id']}, {$val['order_id']}, {$val['id']}, {$this->time}, {$this->time})"
+                    "insert into h_user_course('type', 'user_id', 'course_id', 'order_id', 'order_item_id', 'created_at', 'updated_at') values({$type}, {$this->order[1]}, {$val[1]}, {$this->order[0]}, {$val[0]}, {$this->time}, {$this->time})"
                 );
             }
 
