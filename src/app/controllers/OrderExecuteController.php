@@ -61,10 +61,10 @@ class OrderExecuteController extends BaseController
             while ($row = $result->fetch_assoc()) {
                 $type = $this->db->query("select type from h_edu_courses where id = ".$row['course_id'])->fetch_assoc();
                 //先不考虑 训练营的课程
-                echo $type['type'].'\n';
                 $this->db->query(
-                    "insert into h_user_course('type', 'user_id', 'course_id', 'order_id', 'order_item_id', 'created_at', 'updated_at') values({$type['type']}, {$this->order['user_id']}, {$row['course_id']}, {$this->order['id']}, {$row['id']}, {$this->time}, {$this->time})"
+                    "insert into h_user_course ('type', 'user_id', 'course_id', 'order_id', 'order_item_id', 'created_at', 'updated_at') value({$type['type']}, {$this->order['user_id']}, {$row['course_id']}, {$this->order['id']}, {$row['id']}, {$this->time}, {$this->time})"
                 );
+
             }
 
             return 1;
