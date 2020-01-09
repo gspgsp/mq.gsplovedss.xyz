@@ -151,6 +151,12 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
         return 1;
     }
 
+    /**
+     * 給用戶发放优惠券
+     *
+     * @param $order_id
+     * @param $coupon_id
+     */
     private function _grantUserCoupon($order_id, $coupon_id)
     {
         echo "order id is:".$order_id."coupon is:".$coupon_id."\n";
