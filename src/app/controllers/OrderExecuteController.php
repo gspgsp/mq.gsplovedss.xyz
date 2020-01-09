@@ -115,9 +115,10 @@ class OrderExecuteController extends BaseController
             while ($row = $res->fetch_assoc()) {
                 if ($row['coupon_id']) {
                     $this->_grantUserCoupon($this->order['id'], $row['coupon_id']);
-                    return 1;
                 }
             }
+
+            return 1;
         }
 
         if ($this->order['package_id']) {
