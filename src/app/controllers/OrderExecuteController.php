@@ -159,6 +159,9 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
      */
     private function _grantUserCoupon($order_id, $coupon_id)
     {
-        echo "order id is:".$order_id."coupon is:".$coupon_id."\n";
+
+        swoole_timer_after(3000, function () use ($order_id, $coupon_id) {
+            echo "swoole order id is:".$order_id."coupon is:".$coupon_id."\n";
+        });
     }
 }
