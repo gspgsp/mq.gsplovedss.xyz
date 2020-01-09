@@ -159,10 +159,24 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
      */
     private function _grantUserCoupon($order_id, $coupon_id)
     {
+        $count = 0;
+        $user_id = $this->db->query("select user_id from  h_orders where id = {$this->order['id']}")->fetch_row()[0];
+
         $coupon_res = $this->db->query("select * from h_coupons where id = {$coupon_id} and if(effective_day > 0, timestampdiff(DAY, created_at, now()) <= effective_day, unix_timestamp(not_after) > unix_timestamp(now())) and enabled = 1");
+        $res = $this->db->query("select count(*) as user_coupon_count as  from h_user_coupon where coupon_id = {$coupon_id} and user_id = {$user_id}");
+
+        if ($res){
+            $count = $res->fetch_assoc()['user_coupon_count'];
+        }
+
+
+
         if ($coupon_res){
-            $coupon = $coupon_res->fetch_assoc();
-            var_dump($coupon);
+            while ($coupon = $coupon_res->fetch_assoc()){
+                if ($coupon['limit_number'] > $count && $coupon['total'] > $coupon['used_number']){
+                    var_dump($user_id);
+                }
+            }
         }else{
             swoole_timer_after(
                 6000,
