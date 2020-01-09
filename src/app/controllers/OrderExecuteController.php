@@ -113,6 +113,7 @@ class OrderExecuteController extends BaseController
             "select coupon_id from h_edu_courses where id in(select course_id from h_order_items where order_id = {$this->order['id']})"
         )) {
             while ($row = $res->fetch_assoc()) {
+                var_dump($row);
                 if ($row['coupon_id']) {
                     $this->_grantUserCoupon($this->order['id'], $row['coupon_id']);
                 }
