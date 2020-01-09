@@ -134,6 +134,10 @@ class OrderExecuteController extends BaseController
         return 1;
     }
 
+    /**
+     * 设置当前用户为付费用户
+     * @return int
+     */
     private function _setUserPay()
     {
         $this->db->query(
@@ -141,8 +145,9 @@ class OrderExecuteController extends BaseController
 SET `level`= CASE
    WHEN `level`='not' THEN 'pay'
    ELSE `level`
-END where id = (select user_id from h_orders where id = {$this->order['id']})"
+END 'new_level' where id = (select user_id from h_orders where id = {$this->order['id']})"
         );
+
         return 1;
     }
 
