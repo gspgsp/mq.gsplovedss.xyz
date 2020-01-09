@@ -152,16 +152,24 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
     }
 
     /**
-     * 給用戶发放优惠券
+     * 給用戶发放优惠券，需要用到swoole定时器：https://wiki.swoole.com/wiki/page/480.html，单位毫秒
      *
      * @param $order_id
      * @param $coupon_id
      */
     private function _grantUserCoupon($order_id, $coupon_id)
     {
-
-        swoole_timer_after(6000, function () use ($order_id, $coupon_id) {
-            echo "swoole order id is:".$order_id."coupon is:".$coupon_id."\n";
-        });
+        $coupon_res = $this->db->query("select * from h_coupons where id = {$coupon_id} and if(effective_day > 0, timestampdiff(DAY, created_at, now()) <= effective_day, unix_timestamp(not_after) > unix_timestamp(now())) and enabled = 1");
+        if ($coupon_res){
+            $coupon = $coupon_res->fetch_assoc();
+            var_dump($coupon);
+        }else{
+            swoole_timer_after(
+                6000,
+                function () use ($order_id, $coupon_id) {
+                    echo "swoole order id is:".$order_id."coupon is:".$coupon_id."\n";
+                }
+            );
+        }
     }
 }
