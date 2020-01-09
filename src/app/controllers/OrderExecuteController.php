@@ -175,16 +175,16 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
         if ($coupon_res){
             while ($coupon = $coupon_res->fetch_assoc()){
                 if ($coupon['limit_number'] > $count && $coupon['total'] > $coupon['used_number']){
-                    echo "user_id is:".$this->user_id;
+
+                    //TODO::逻辑处理
+                    swoole_timer_after(
+                        6000,
+                        function () use ($order_id, $coupon_id) {
+                            echo "swoole order id is:".$order_id."coupon is:".$coupon_id."\n";
+                        }
+                    );
                 }
             }
-        }else{
-            swoole_timer_after(
-                6000,
-                function () use ($order_id, $coupon_id) {
-                    echo "swoole order id is:".$order_id."coupon is:".$coupon_id."\n";
-                }
-            );
         }
     }
 }
