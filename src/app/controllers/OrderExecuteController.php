@@ -136,7 +136,14 @@ class OrderExecuteController extends BaseController
 
     private function _setUserPay()
     {
-
+        $this->db->query(
+            "UPDATE h_users
+SET `level`= CASE
+   WHEN `level`='not' THEN 'pay'
+   ELSE `level`
+END where id = (select user_id from h_orders where id = {$this->order['id']})"
+        );
+        return 1;
     }
 
     private function _grantUserCoupon($order_id, $coupon_id)
