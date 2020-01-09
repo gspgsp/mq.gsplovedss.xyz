@@ -145,7 +145,7 @@ class OrderExecuteController extends BaseController
 SET `level`= CASE
    WHEN `level`='not' THEN 'pay'
    ELSE `level`
-END 'new_level' where id = (select user_id from h_orders where id = {$this->order['id']})"
+END where id = (select user_id from h_orders where id = {$this->order['id']})"
         );
 
         return 1;
