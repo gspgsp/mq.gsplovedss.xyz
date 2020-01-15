@@ -229,6 +229,7 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
     {
         $vip = $this->db->query("select vip_level, effective_day from h_vips where id = {$this->order['vip_id']}")->fetch_assoc();
 var_dump($vip);
+var_dump($this->order);
         $this->db->query("update h_users set `start_at` = now(), `level` = {$vip['vip_level']}, `end_at` = case when {$vip['effective_day']} > 0 then date_add(now(), interval {$vip['effective_day']} day)  else null end where id = {$this->order['user_id']}");
     }
 }
