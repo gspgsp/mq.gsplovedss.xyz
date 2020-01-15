@@ -30,8 +30,10 @@ class OrderExecuteController extends BaseController
                 if (!$result) {
                     return 0;
                 }
-                $this->order = $result->fetch_assoc();
-                $this->user_id = $this->db->query("select user_id from  h_orders where id = {$this->order['id']}")->fetch_row()[0];
+                $this->order   = $result->fetch_assoc();
+                $this->user_id = $this->db->query(
+                    "select user_id from  h_orders where id = {$this->order['id']}"
+                )->fetch_row()[0];
 
                 //开启事务
                 $this->db->begin_transaction();
@@ -48,6 +50,33 @@ class OrderExecuteController extends BaseController
                     $this->db->rollback();
 
                     return $exception->getMessage();
+                }
+            } else {
+                if ($this->params['branch_type'] == 'vip') {
+
+                    $this->params['order_id'] = 912;
+                    $result                   = $this->db->query(
+                        "select id, vip_id, user_id from h_vip_orders where id = ".$this->params['order_id']
+                    );
+                    if (!$result) {
+                        return 0;
+                    }
+                    $this->order   = $result->fetch_assoc();
+
+                    $this->db->begin_transaction();
+                    try {
+                        // 给当前VIP加购买量
+                        $this->_setVipBuyNum();
+                        // 给用户加VIP
+                        $this->_setUserVip();
+                        $this->db->commit();
+
+                        return 1;
+                    } catch (\Exception $exception) {
+                        $this->db->rollback();
+
+                        return $exception->getMessage();
+                    }
                 }
             }
         }
@@ -163,18 +192,21 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
     {
         $count = 0;
 
-        $coupon_res = $this->db->query("select * from h_coupons where id = {$coupon_id} and if(effective_day > 0, timestampdiff(DAY, created_at, now()) <= effective_day, unix_timestamp(not_after) > unix_timestamp(now())) and enabled = 1");
-        $res = $this->db->query("select count(*) as user_coupon_count as  from h_user_coupon where coupon_id = {$coupon_id} and user_id = {$this->user_id}");
+        $coupon_res = $this->db->query(
+            "select * from h_coupons where id = {$coupon_id} and if(effective_day > 0, timestampdiff(DAY, created_at, now()) <= effective_day, unix_timestamp(not_after) > unix_timestamp(now())) and enabled = 1"
+        );
+        $res        = $this->db->query(
+            "select count(*) as user_coupon_count as  from h_user_coupon where coupon_id = {$coupon_id} and user_id = {$this->user_id}"
+        );
 
-        if ($res){
+        if ($res) {
             $count = $res->fetch_assoc()['user_coupon_count'];
         }
 
 
-
-        if ($coupon_res){
-            while ($coupon = $coupon_res->fetch_assoc()){
-                if ($coupon['limit_number'] > $count && $coupon['total'] > $coupon['used_number']){
+        if ($coupon_res) {
+            while ($coupon = $coupon_res->fetch_assoc()) {
+                if ($coupon['limit_number'] > $count && $coupon['total'] > $coupon['used_number']) {
 
                     //TODO::逻辑处理
                     swoole_timer_after(
@@ -186,5 +218,17 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
                 }
             }
         }
+    }
+
+    private function _setVipBuyNum()
+    {
+        $this->db->query("update h_vips set buy_num = buy_num + 1 where id = {$this->order['vip_id']}");
+    }
+
+    private function _setUserVip()
+    {
+        $vip = $this->db->query("select vip_level, effective_day from h_vips where id = {$this->order['vip_id']}")->fetch_assoc();
+
+        $this->db->query("update h_users set `start_at` = '{$this->time}', `level` = {$vip['vip_level']}, `end_at` = case when {$vip['effective_day']} > 0 then date_add(now(), interval {$vip['effective_day']} day)  else null end where id = {$this->order['user_id']}");
     }
 }
