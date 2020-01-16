@@ -26,6 +26,7 @@ class PaidSuccessMessageController extends BaseController
      */
     private function _sendLogMessage()
     {
+        echo 'yyyyyy';
         $this->db->begin_transaction();
         try {
             $send_type = json_encode(['sms' => 1, 'web' => 1, 'email' => 1, 'wechat' => 1]);
