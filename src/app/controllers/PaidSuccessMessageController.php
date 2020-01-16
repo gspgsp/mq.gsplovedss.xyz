@@ -26,20 +26,17 @@ class PaidSuccessMessageController extends BaseController
      */
     private function _sendLogMessage()
     {
-        echo 'yyyyyy';
         $this->db->begin_transaction();
         try {
             $send_type = json_encode(['sms' => 1, 'web' => 1, 'email' => 1, 'wechat' => 1]);
-            $res = $this->db->query(
+            $res       = $this->db->query(
                 "insert into h_messages(`user_type`, `message_object`, `event`, `title`, `type`, `send_type`, `texts`, `numbers`, `status`, `user_id`, `created_at`, `updated_at`) value (2,'event','paidSuccessMessage','课程支付成功通知',2,'{$send_type}', '订单支付成功，感谢您的支持',1,1,{$this->user_id},now(),now())"
             );
 
-            var_dump($res);
-
             if ($res) {
-                echo '111111';
+                echo $this->db->insert_id;
                 $this->db->query(
-                    "insert into h_user_message(`message_type`,`status`,`created_at`,`updated_at`,`user_id`,`message_id`) value(2,0,{$this->time},{$this->time},{$this->user_id},{$this->db->insert_id})"
+                    "insert into h_user_message(`message_type`,`status`,`created_at`,`updated_at`,`user_id`,`message_id`) value(2,0,now(),now(),{$this->user_id},{$this->db->insert_id})"
                 );
             }
             $this->db->commit();
@@ -47,7 +44,7 @@ class PaidSuccessMessageController extends BaseController
             return 1;
         } catch (\Exception $exception) {
             $this->db->rollback();
-echo '22222';
+
             return $exception->getMessage();
         }
     }
