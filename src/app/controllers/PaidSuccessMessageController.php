@@ -32,6 +32,7 @@ class PaidSuccessMessageController extends BaseController
             if ($this->db->query(
                 "insert into h_messages('user_type', 'message_object', 'event', 'title', 'type', 'send_type', 'texts', 'numbers', 'status', 'user_id', 'created_at', 'updated_at') value (2,'event','paidSuccessMessage','课程支付成功通知',2,{$send_type}, '订单支付成功，感谢您的支持',1,1,{$this->user_id},'{$this->time}','{$this->time}')"
             )) {
+                echo '111111';
                 $this->db->query(
                     "insert into h_user_message('message_type','status','created_at','updated_at','user_id','message_id') value(2,0,{$this->time},{$this->time},{$this->user_id},{$this->db->insert_id})"
                 );
@@ -41,7 +42,7 @@ class PaidSuccessMessageController extends BaseController
             return 1;
         } catch (\Exception $exception) {
             $this->db->rollback();
-
+echo '22222';
             return $exception->getMessage();
         }
     }
