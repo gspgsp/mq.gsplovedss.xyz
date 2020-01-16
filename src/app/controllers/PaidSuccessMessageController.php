@@ -17,7 +17,7 @@ class PaidSuccessMessageController extends BaseController
     public function paidSuccessMessage()
     {
         $this->_sendLogMessage();
-//        $this->_sendSms();
+        $this->_sendSms();
     }
 
     /**
@@ -34,7 +34,6 @@ class PaidSuccessMessageController extends BaseController
             );
 
             if ($res) {
-                echo $this->db->insert_id;
                 $this->db->query(
                     "insert into h_user_message(`message_type`,`status`,`created_at`,`updated_at`,`user_id`,`message_id`) value(2,0,now(),now(),{$this->user_id},{$this->db->insert_id})"
                 );
