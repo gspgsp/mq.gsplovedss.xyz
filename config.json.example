@@ -11,5 +11,8 @@
         "port": 6379
         "password": "123"
         "timeout": 3
+    },
+    "yunpian":{
+        "apikey":""
     }
 }
