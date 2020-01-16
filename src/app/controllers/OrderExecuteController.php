@@ -8,9 +8,6 @@ namespace Gjh\Queue\app\controllers;
 
 class OrderExecuteController extends BaseController
 {
-    protected $order;
-    protected $time;
-    protected $user_id;
 
     /**
      * 订单处理
@@ -18,23 +15,8 @@ class OrderExecuteController extends BaseController
      */
     public function orderExecute()
     {
-        $this->time = date("Y-m-d H:i:s", time());
         if (!empty($this->params) && is_array($this->params)) {
             if ($this->params['branch_type'] == 'order') {
-
-                //当为订单时
-                $this->params['order_id'] = 1563;
-                $result                   = $this->db->query(
-                    "select id, user_id, package_id from h_orders where id = ".$this->params['order_id']
-                );
-                if (!$result) {
-                    return 0;
-                }
-                $this->order   = $result->fetch_assoc();
-                $this->user_id = $this->db->query(
-                    "select user_id from  h_orders where id = {$this->order['id']}"
-                )->fetch_row()[0];
-
                 //开启事务
                 $this->db->begin_transaction();
                 try {
@@ -51,32 +33,20 @@ class OrderExecuteController extends BaseController
 
                     return $exception->getMessage();
                 }
-            } else {
-                if ($this->params['branch_type'] == 'vip') {
+            } elseif ($this->params['branch_type'] == 'vip') {
+                $this->db->begin_transaction();
+                try {
+                    // 给当前VIP加购买量
+                    $this->_setVipBuyNum();
+                    // 给用户加VIP
+                    $this->_setUserVip();
+                    $this->db->commit();
 
-                    $this->params['order_id'] = 912;
-                    $result                   = $this->db->query(
-                        "select id, vip_id, user_id from h_vip_orders where id = ".$this->params['order_id']
-                    );
-                    if (!$result) {
-                        return 0;
-                    }
-                    $this->order   = $result->fetch_assoc();
+                    return 1;
+                } catch (\Exception $exception) {
+                    $this->db->rollback();
 
-                    $this->db->begin_transaction();
-                    try {
-                        // 给当前VIP加购买量
-                        $this->_setVipBuyNum();
-                        // 给用户加VIP
-                        $this->_setUserVip();
-                        $this->db->commit();
-
-                        return 1;
-                    } catch (\Exception $exception) {
-                        $this->db->rollback();
-
-                        return $exception->getMessage();
-                    }
+                    return $exception->getMessage();
                 }
             }
         }
@@ -97,7 +67,7 @@ class OrderExecuteController extends BaseController
                 $type = $this->db->query("select type from h_edu_courses where id = ".$row['course_id'])->fetch_assoc();
                 //先不考虑 训练营的课程
                 $this->db->query(
-                    "insert into h_user_course (`type`, `user_id`, `course_id`, `order_id`, `order_item_id`, `created_at`, `updated_at`) value('{$type['type']}', {$this->order['user_id']}, {$row['course_id']}, {$this->order['id']}, {$row['id']}, '{$this->time}', '{$this->time}')"
+                    "insert into h_user_course (`type`, `user_id`, `course_id`, `order_id`, `order_item_id`, `created_at`, `updated_at`) value('{$type['type']}', {$this->user_id}, {$row['course_id']}, {$this->order['id']}, {$row['id']}, '{$this->time}', '{$this->time}')"
                 );
             }
 
@@ -176,7 +146,7 @@ class OrderExecuteController extends BaseController
 SET `level`= CASE
    WHEN `level`='not' THEN 'pay'
    ELSE `level`
-END where id = (select user_id from h_orders where id = {$this->order['id']})"
+END where id = {$this->user_id}"
         );
 
         return 1;
@@ -227,7 +197,11 @@ END where id = (select user_id from h_orders where id = {$this->order['id']})"
 
     private function _setUserVip()
     {
-        $vip = $this->db->query("select vip_level, effective_day from h_vips where id = {$this->order['vip_id']}")->fetch_assoc();
-        $this->db->query("update h_users set `start_at` = now(), `level` = '{$vip['vip_level']}', `end_at` = case when {$vip['effective_day']} > 0 then date_add(now(), interval {$vip['effective_day']} day)  else null end where id = {$this->order['user_id']}");
+        $vip = $this->db->query(
+            "select vip_level, effective_day from h_vips where id = {$this->order['vip_id']}"
+        )->fetch_assoc();
+        $this->db->query(
+            "update h_users set `start_at` = now(), `level` = '{$vip['vip_level']}', `end_at` = case when {$vip['effective_day']} > 0 then date_add(now(), interval {$vip['effective_day']} day)  else null end where id = {$this->user_id}"
+        );
     }
 }
