@@ -31,7 +31,7 @@ class PaidSuccessMessageController extends BaseController
         try {
             $send_type = json_encode(['sms' => 1, 'web' => 1, 'email' => 1, 'wechat' => 1]);
             $res = $this->db->query(
-                "insert into h_messages('user_type', 'message_object', 'event', 'title', 'type', 'send_type', 'texts', 'numbers', 'status', 'user_id', 'created_at', 'updated_at') value (2,'event','paidSuccessMessage','课程支付成功通知',2,{$send_type}, '订单支付成功，感谢您的支持',1,1,{$this->user_id},'{$this->time}','{$this->time}')"
+                "insert into h_messages(`user_type`, `message_object`, `event`, `title`, `type`, `send_type`, `texts`, `numbers`, `status`, `user_id`, `created_at`, `updated_at`) value (2,'event','paidSuccessMessage','课程支付成功通知',2,'{$send_type}', '订单支付成功，感谢您的支持',1,1,{$this->user_id},now(),now())"
             );
 
             var_dump($res);
@@ -39,7 +39,7 @@ class PaidSuccessMessageController extends BaseController
             if ($res) {
                 echo '111111';
                 $this->db->query(
-                    "insert into h_user_message('message_type','status','created_at','updated_at','user_id','message_id') value(2,0,{$this->time},{$this->time},{$this->user_id},{$this->db->insert_id})"
+                    "insert into h_user_message(`message_type`,`status`,`created_at`,`updated_at`,`user_id`,`message_id`) value(2,0,{$this->time},{$this->time},{$this->user_id},{$this->db->insert_id})"
                 );
             }
             $this->db->commit();
